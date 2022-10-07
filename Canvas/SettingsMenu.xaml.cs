@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -6,15 +8,27 @@ namespace Canvas
 {
 	public partial class SettingsMenu : Window
 	{
-		private List<SettingItem> settingsList = new List<SettingItem>()
+		private static TextSettingItem userName = new TextSettingItem("UserName");
+		private static PasswordSettingItem password = new PasswordSettingItem("Password");
+		private static BoolSettingItem darkMode = new BoolSettingItem("Darkmode");
+		private static BoolSettingItem keepmenuBar = new BoolSettingItem("KeepmenuBar");
+		public String UserName{ get { return userName.Value; } }
+		public String Password{ get { return password.Value; } }
+		public Boolean DarkMode { get { return darkMode.Value; } }
+		public Boolean KeepMenuBar { get { return keepmenuBar.Value; } }
+
+		private List<SettingItemBase> settingsList = new List<SettingItemBase>()
 		{
-			new TextSettingItem("UserName"),
-			new PasswordSettingItem("Password")
+			userName,
+			password,
+			darkMode,
+			keepmenuBar
 		};
+
 		public SettingsMenu()
 		{
 			InitializeComponent();
-			foreach (SettingItem si in settingsList)
+			foreach (SettingItemBase si in settingsList)
 			{
 				SettingGrid.RowDefinitions.Add(new RowDefinition());
 				int rc = SettingGrid.RowDefinitions.Count;
@@ -24,27 +38,48 @@ namespace Canvas
 				Grid.SetColumn(si.control, 1);
 			}
 		}
-	}
-	internal class SettingItem
-	{
-		public Label label { get; internal set; }
-		public Control control { get; internal set; }
-	}
-	internal class TextSettingItem : SettingItem
-	{
-		public TextSettingItem(string labelText)
+		public abstract class SettingItemBase
 		{
-			label = new Label() { Content = labelText };
-			control = new TextBox();
+			public Label label { get; internal set; }
+			public Control control { get; internal set; }
 		}
-	}
-	internal class PasswordSettingItem : SettingItem
-	{
-		public PasswordSettingItem(string labelText)
-		{
-			label = new Label() { Content = labelText };
-			control = new PasswordBox() { };
 
+		public abstract class SettingItem<T> : SettingItemBase
+			{
+			public T Value { get; internal set; }
+			public SettingItem(string lblText)
+			{
+				label = new Label() { Content = lblText };
+			}
+		}
+		public class TextSettingItem : SettingItem<String>
+		{
+			public TextSettingItem(string lblText) : base(lblText)
+			{
+				control = new TextBox();
+			}
+
+		}
+		public class PasswordSettingItem :  SettingItem<String>
+		{
+			public PasswordSettingItem(string lblText) : base(lblText)
+			{
+				control = new PasswordBox() { };
+			}
+
+		}
+		public class BoolSettingItem : SettingItem<bool>
+		{
+
+			public BoolSettingItem(string lblText) : base(lblText)
+			{
+				control = new CheckBox() { };
+			}
+		}
+
+		internal String Save()
+		{
+			return "";
 		}
 	}
 }
